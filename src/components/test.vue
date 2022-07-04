@@ -1,5 +1,5 @@
 <template>
-  <h1>测试模板123</h1>
+  <h1>测试模板1234</h1>
 </template>
 
 <script>
