@@ -1,5 +1,5 @@
 <template>
-  <h1>测试模板12345</h1>
+  <h1>master-test2</h1>
 </template>
 
 <script>
