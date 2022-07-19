@@ -1,37 +1,15 @@
 <template>
-    <div class="list-footer">
-        <input type="checkbox" @click="chooseAll" :checked="isAllChecked">
-        已完成<span>{{finishedList}}</span> / 全部<span>{{lists.length}}</span>
-        <button class="clear-finish">清除已完成</button>
+    <div class="list-footer" v-show="allList">
+        <input type="checkbox" @change="chooseAll" :checked="isAll">
+        已完成<span>{{doneList}}</span> / 全部<span>{{allList}}</span>
+        <button class="clear-finish" @click="clearFinished">清除已完成</button>
     </div>
 </template>
 
 <script>
     export default {
         name:'ListFooter',
-        props:['lists'],
-        data() {
-            return {
-                isAllChecked:0
-            }
-        },
-        computed:{
-            finishedList(){
-                let i = 0;
-                this.lists.forEach(list => {
-                    if(list.isChecked){
-                        i++;
-                    }
-                });
-                return i;
-                // return this.lists.reduce((prev,current)=> prev + (current.isChecked === 1 ? 1 : 0),0)//reduce写法，更简洁
-            }
-        },
-        methods:{
-            chooseAll(){
-
-            }
-        },
+        props:['doneList','allList','isAll','chooseAll','clearFinished'],
     }
 </script>
 

@@ -2,9 +2,19 @@
   <div id="app">
     <div class="todo-list">
       <h3>待办事项</h3>
-      <list-header :lists="lists"></list-header>
-      <list-content :lists="lists"></list-content>
-      <list-footer :lists="lists"></list-footer>
+      <list-header :addTodo="addTodo"></list-header>
+      <list-content
+       :lists="lists"
+       :deleteCurList="deleteCurList"
+       :checkedChange="checkedChange">
+      </list-content>
+      <list-footer
+       :doneList="doneList"
+       :allList="allList"
+       :isAll="isAll"
+       :chooseAll="chooseAll"
+       :clearFinished="clearFinished">
+      </list-footer>
     </div>
   </div>
 </template>
@@ -16,18 +26,80 @@ import ListFooter from './components/ListFooter.vue'
 
 export default {
   name: 'App',
-  components: {
-    ListHeader,
-    ListContent,
-    ListFooter
-  },
+  components: {ListHeader,ListContent,ListFooter},
   data() {
     return {
       lists:[
-          {id:'001',name:'工作',isChecked:1},
-          {id:'002',name:'学习',isChecked:0},
-          {id:'003',name:'娱乐',isChecked:1}
+          {id:'001',title:'工作',done:true},
+          {id:'002',title:'学习',done:false},
+          {id:'003',title:'娱乐',done:true}
       ]
+    }
+  },
+  methods:{
+    //用一个函数里的参数接收ListHeader子组件传过来的todo对象，添加到lists数组中
+    addTodo(todo){
+      //console.log('我是app父组件，我收到了子组件传过来的todo对象：',todo)
+      this.lists.unshift(todo)
+    },
+    //用一个函数里的参数接收ListContent子组件传递过来的curId字符串，删除当前项
+    deleteCurList(curId){
+      // console.log(e.target.value)
+      this.lists.forEach((curList,index) => {
+          // console.log(curList);
+          // console.log(index);
+          if(curList.id === curId){
+              // console.log(index)
+              if(confirm('确定删除吗？')){
+                  this.lists.splice(index,1)
+              }
+          }
+      });
+    },
+    //用一个函数里的参数接收ListContent子组件传递过来的curId字符串，修改当前项的done值
+    checkedChange(cudId){
+      // console.log(cudId)
+      this.lists.forEach(curList => {
+          if(curList.id === cudId){
+              curList.done = !curList.done;
+          }
+      })
+    },
+    //全选或取消全选
+    chooseAll(e){
+        //console.log(e.target.checked)
+        this.lists.forEach(list => {
+            list.done = e.target.checked
+        });
+    },
+    //清空已完成
+    clearFinished(){
+      if(confirm('确定清空已完成吗？')){
+        this.lists = this.lists.filter(list => {
+            return !list.done;
+        })
+      }
+    }
+  },
+  computed:{
+    //统计已完成个数
+    doneList(){
+        let i = 0;
+        this.lists.forEach(list => {
+            if(list.done){
+                i++;
+            }
+        });
+        return i;
+        // return this.lists.reduce((prev,current)=> prev + (current.isChecked ? 1 : 0),0)//reduce写法，更简洁
+    },
+    //todo总个数
+    allList(){
+        return this.lists.length
+    },
+    //判断是否全选
+    isAll(){
+        return this.doneList == this.allList && this.allList > 0;
     }
   },
 }

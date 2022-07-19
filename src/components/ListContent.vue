@@ -1,12 +1,12 @@
 <template>
     <div class="list-content">
         <ul>
-            <li v-for="list in contentLists" :key="list.id">
+            <li v-for="list in lists" :key="list.id">
                 <label for="list-checkbox">
-                    <input type="checkbox" :checked='list.isChecked'>
-                    {{list.name}}
+                    <input type="checkbox" :checked='list.done' @click="checkedThis(list.id)">
+                    {{list.title}}
                 </label>
-                <button class="list-delete" @click="deleteCurList" :value="list.id">删除</button>
+                <button class="list-delete" @click="deleteThis" :value="list.id">删除</button>
             </li>
         </ul>
     </div>
@@ -15,25 +15,17 @@
 <script>
     export default {
         name:'ListContent',
-        props:['lists'],
-        data() {
-            return {
-                contentLists:this.lists
-            }
-        },
+        props:['lists','deleteCurList','checkedChange'],
         methods: {
-            deleteCurList(e){
-                // console.log(e.target.value)
+            //将当前todo项的id传递给父组件
+            deleteThis(e){
                 let curId = e.target.value;
-                this.contentLists.forEach((curList,index) => {
-                    // console.log(curList);
-                    // console.log(index);
-                    if(curList.id === curId){
-                        // console.log(index)
-                        this.contentLists.splice(index,1)
-                    }
-                });
-
+                this.deleteCurList(curId)
+            },
+            //将当前todo项的id传递给父组件
+            checkedThis(cudId){
+                // console.log(cudId)
+                this.checkedChange(cudId)
             }
         },
     }
