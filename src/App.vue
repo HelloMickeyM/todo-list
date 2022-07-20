@@ -29,18 +29,14 @@ export default {
   components: {ListHeader,ListContent,ListFooter},
   data() {
     return {
-      lists:[
-          {id:'001',title:'工作',done:true},
-          {id:'002',title:'学习',done:false},
-          {id:'003',title:'娱乐',done:true}
-      ]
+      lists: JSON.parse(localStorage.getItem('todos')) || []//读取localStorage里的todos字符串，转换为数组对象，初始化时为空数组
     }
   },
   methods:{
     //用一个函数里的参数接收ListHeader子组件传过来的todo对象，添加到lists数组中
     addTodo(todo){
       //console.log('我是app父组件，我收到了子组件传过来的todo对象：',todo)
-      this.lists.unshift(todo)
+      this.lists.unshift(todo);
     },
     //用一个函数里的参数接收ListContent子组件传递过来的curId字符串，删除当前项
     deleteCurList(curId){
@@ -100,8 +96,17 @@ export default {
     //判断是否全选
     isAll(){
         return this.doneList == this.allList && this.allList > 0;
-    }
+    },
   },
+  watch:{
+    //监测lists数组，添加到localStorage
+    lists:{
+      deep:true,//开启深度监视，能够监测到数组内层数据的变化。不开启只能监测到数组这一层
+      handler(value){
+        localStorage.setItem('todos',JSON.stringify(value))
+      }
+    },
+  }
 }
 </script>
 
