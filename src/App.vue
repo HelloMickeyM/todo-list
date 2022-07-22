@@ -2,12 +2,8 @@
   <div id="app">
     <div class="todo-list">
       <h3>待办事项</h3>
-      <list-header :addTodo="addTodo"></list-header>
-      <list-content
-       :lists="lists"
-       :deleteCurList="deleteCurList"
-       :checkedChange="checkedChange">
-      </list-content>
+      <list-header @addTodo="addTodo"></list-header>
+      <list-content :lists="lists" @editTodo="editTodo"></list-content>
       <list-footer
        :doneList="doneList"
        :allList="allList"
@@ -20,6 +16,7 @@
 </template>
 
 <script>
+import pubsub from 'pubsub-js'
 import ListHeader from './components/ListHeader.vue'
 import ListContent from './components/ListContent.vue'
 import ListFooter from './components/ListFooter.vue'
@@ -52,11 +49,18 @@ export default {
           }
       });
     },
+    editTodo(curdId,curTitle){
+      this.lists.forEach(todo => {
+        if(todo.id == curdId){
+          todo.title = curTitle;
+        }
+      });
+    },
     //用一个函数里的参数接收ListContent子组件传递过来的curId字符串，修改当前项的done值
-    checkedChange(cudId){
+    checkedChange(name,curdId){
       // console.log(cudId)
       this.lists.forEach(curList => {
-          if(curList.id === cudId){
+          if(curList.id === curdId){
               curList.done = !curList.done;
           }
       })
@@ -106,6 +110,14 @@ export default {
         localStorage.setItem('todos',JSON.stringify(value))
       }
     },
+  },
+  mounted(){
+    this.$bus.$on('deleteCurList',this.deleteCurList)//全局事件总线方法接收数据
+    this.pubId = pubsub.subscribe('checkedChange',this.checkedChange)//用订阅消息方法接收数据
+  },
+  beforeDestroy(){
+    this.$bus.$off('deleteCurList')//解绑$bus上的事件
+    pubsub.unsubscribe(pubId)//取消订阅
   }
 }
 </script>
@@ -127,6 +139,16 @@ body,h1,h2,h3,h4,h5,ul,input{
 }
 ul li{
   list-style: none;
+}
+
+.global-btn{
+    padding: 5px 8px;
+    margin-top: -2px;
+    background: #42b983;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
 }
 
 .todo-list{

@@ -3,29 +3,62 @@
         <ul>
             <li v-for="list in lists" :key="list.id">
                 <label for="list-checkbox">
-                    <input type="checkbox" :checked='list.done' @click="checkedThis(list.id)">
-                    {{list.title}}
+                    <input type="checkbox"
+                     :checked='list.done'
+                     @click="checkedThis(list.id)"
+                    >
+                    <span class="list-title" v-show="!list.isEdit">{{list.title}}</span>
+                    <input
+                     type="text"
+                     class="edit-input"
+                     v-show="list.isEdit"
+                     v-bind:value="list.title"
+                     @blur="blurThis(list,$event)"
+                     ref="inputTitle"
+                    >
                 </label>
-                <button class="list-delete" @click="deleteThis" :value="list.id">删除</button>
+                <button class="global-btn list-edit" @click="editThis(list)" v-show="!list.isEdit">编辑</button>
+                <button class="global-btn list-delete" @click="deleteThis(list.id)">删除</button>
             </li>
         </ul>
     </div>
 </template>
 
 <script>
+    import pubsub from 'pubsub-js'
     export default {
         name:'ListContent',
-        props:['lists','deleteCurList','checkedChange'],
+        props:['lists'],
         methods: {
             //将当前todo项的id传递给父组件
-            deleteThis(e){
-                let curId = e.target.value;
-                this.deleteCurList(curId)
+            deleteThis(curdId){
+                // this.deleteCurList(curId)
+                this.$bus.$emit('deleteCurList',curdId)//全局事件总线方法发送数据
             },
             //将当前todo项的id传递给父组件
-            checkedThis(cudId){
+            checkedThis(curdId){
                 // console.log(cudId)
-                this.checkedChange(cudId)
+                pubsub.publish('checkedChange',curdId)//用订阅消息方法发送数据
+            },
+            editThis(curList){
+                // console.log(curList)
+                if(curList.hasOwnProperty('isEdit')){
+                    curList.isEdit = true
+                }else{
+                    this.$set(curList,'isEdit',true)
+                };
+                this.$nextTick(function(){
+                    // this.$refs.inputTitle[0].focus();
+                    this.$refs.inputTitle.forEach((item)=>{
+                        item.focus();
+                    })
+                })
+            },
+            blurThis(curList,e){
+                // console.log('失去焦点了')
+                curList.isEdit = false;
+                let curTitle = e.target.value;
+                this.$emit('editTodo',curList.id,curTitle)
             }
         },
     }
@@ -45,23 +78,36 @@
         padding: 9px;
         border-bottom: 1px solid #999;
         box-sizing: border-box;
+        display: flex;
+        align-items: center;
+    }
+    .list-content li label{
+        display: flex;
+        align-items: center;
+        flex: 1;
     }
     .list-content input{
         vertical-align: middle;
-        margin-top: -3px;
+    }
+    .list-content .list-title{
+        display: block;
+        padding: 5px 0;
+        margin-left: 5px;
     }
     .list-content .list-delete{
         display: none;
-        float: right;
-        padding: 3px 8px;
-        margin-top: -2px;
-        background: #42b983;
-        color: #fff;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
+    }
+    .list-content .list-edit{
+        display: none;
+        margin-right: 5px;
     }
     .list-content li:hover .list-delete{
         display: block;
+    }
+    .list-content li:hover .list-edit{
+        display: block;
+    }
+    .list-content .edit-input{
+        padding: 4px;
     }
 </style>
